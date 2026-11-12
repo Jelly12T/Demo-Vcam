@@ -9,6 +9,8 @@ final class CameraLabViewController: UIViewController {
     private let preview = PreviewView()
     private let fpsLabel = UILabel()
     private let segmented = UISegmentedControl(items: ["Live Camera", "Video Source", "VCam"])
+    private let couplingLabel = UILabel()
+    private let coupling = UISegmentedControl(items: ["Off", "Cam on, show video", "Show cam, buf=video"])
     private let chooseButton = UIButton(type: .system)
     private let logButton = UIButton(type: .system)
     private let exportButton = UIButton(type: .system)
@@ -57,6 +59,13 @@ final class CameraLabViewController: UIViewController {
         segmented.selectedSegmentIndex = 0
         segmented.addTarget(self, action: #selector(sourceChanged), for: .valueChanged)
 
+        couplingLabel.text = "Live coupling (real camera running → green dot):"
+        couplingLabel.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+        couplingLabel.textColor = .secondaryLabel
+        coupling.selectedSegmentIndex = 0
+        coupling.addTarget(self, action: #selector(sourceChanged), for: .valueChanged)
+        coupling.apportionsSegmentWidthsByContent = true
+
         configure(chooseButton, "Choose Video…", #selector(chooseVideo))
         configure(logButton, "Log Snapshot", #selector(logSnapshot))
         configure(exportButton, "Export Logs", #selector(exportLogs))
@@ -79,8 +88,10 @@ final class CameraLabViewController: UIViewController {
         buttonsRow.spacing = 8
 
         let stack = UIStackView(arrangedSubviews: [
-            segmented, chooseButton, buttonsRow, inspectorLabel, detectionLabel, logsView
+            segmented, couplingLabel, coupling, chooseButton, buttonsRow,
+            inspectorLabel, detectionLabel, logsView
         ])
+        stack.setCustomSpacing(2, after: couplingLabel)
         stack.axis = .vertical
         stack.spacing = 8
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -132,9 +143,11 @@ final class CameraLabViewController: UIViewController {
         let newSource: FrameSource?
         if segmented.selectedSegmentIndex == 0 {
             chooseButton.isEnabled = false
+            coupling.isEnabled = false        // coupling only applies to an injected source.
             newSource = CameraCaptureService()
         } else {
             chooseButton.isEnabled = true
+            coupling.isEnabled = true
             guard let url = videoURL else {
                 inspectorLabel.text = "Frame Inspector: pick a video to inject."
                 detectionLabel.attributedText = nil
@@ -145,9 +158,18 @@ final class CameraLabViewController: UIViewController {
             // 1 = weak stand-in (BGRA, no intrinsics, PTS resets) → easily flagged.
             // 2 = realistic VCam reproduction (420v, forged intrinsics, monotonic
             //     PTS) → slips past the naive heuristics, like a real injector.
-            newSource = segmented.selectedSegmentIndex == 2
+            let injector: FrameSource = segmented.selectedSegmentIndex == 2
                 ? VCamInjectionService(url: url)
                 : VideoFixtureService(url: url)
+
+            // Coupling runs a REAL camera session alongside the injector so the
+            // green indicator is on and "is the session live?" checks pass, while
+            // the detector is fed the video — the scenario eKYC must catch.
+            switch coupling.selectedSegmentIndex {
+            case 1:  newSource = CoupledInjectionService(injector: injector, mode: .showVideo)
+            case 2:  newSource = CoupledInjectionService(injector: injector, mode: .showCameraBufferVideo)
+            default: newSource = injector
+            }
         }
         newSource?.delegate = self
         source = newSource
@@ -277,7 +299,10 @@ extension CameraLabViewController: FrameSourceDelegate {
                 self.latestResult = result
                 self.render(info, result)
             }
-            self.preview.enqueue(packet.sampleBuffer)
+            // Verify sampleBuffer, but display previewOverride when set: in the
+            // coupled "show camera" demo the human sees the live camera while the
+            // detector is being fed the injected video.
+            self.preview.enqueue(packet.previewOverride ?? packet.sampleBuffer)
         }
     }
 

@@ -9,10 +9,26 @@ enum FrameSourceKind: String {
 }
 
 struct FramePacket {
+    /// The buffer the pipeline *verifies* — what the inspector and detector see.
     let sampleBuffer: CMSampleBuffer
     let kind: FrameSourceKind
     /// CACurrentMediaTime() at the moment the packet was produced — used for wall-clock FPS.
     let receivedHostTime: CFTimeInterval
+    /// Optional buffer to *display* instead of `sampleBuffer`. When set, the human
+    /// watching the preview sees this while the detector still evaluates
+    /// `sampleBuffer`. Used by the coupled demo to show the live camera on screen
+    /// while the verified buffer is a replayed clip. `nil` ⇒ preview shows `sampleBuffer`.
+    let previewOverride: CMSampleBuffer?
+
+    init(sampleBuffer: CMSampleBuffer,
+         kind: FrameSourceKind,
+         receivedHostTime: CFTimeInterval,
+         previewOverride: CMSampleBuffer? = nil) {
+        self.sampleBuffer = sampleBuffer
+        self.kind = kind
+        self.receivedHostTime = receivedHostTime
+        self.previewOverride = previewOverride
+    }
 }
 
 protocol FrameSourceDelegate: AnyObject {

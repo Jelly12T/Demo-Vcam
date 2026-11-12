@@ -28,6 +28,7 @@ CameraTestLab/
 │   ├── CameraCaptureService.swift      # live camera (AVCaptureSession, intrinsics enabled)
 │   ├── VideoFixtureService.swift       # WEAK injected video (BGRA, no intrinsics, PTS resets) — easy to flag
 │   ├── VCamInjectionService.swift      # REALISTIC VCam reproduction (420v, forged intrinsics, monotonic PTS)
+│   ├── CoupledInjectionService.swift   # runs the REAL camera (green dot on) alongside the injected buffer
 │   ├── FrameInspector.swift            # pixel format, resolution, PTS, intrinsics, attachments
 │   ├── VCamDetectionService.swift      # defensive detector (replace with your production module)
 │   ├── TestLog.swift                   # log entry model
@@ -61,6 +62,21 @@ brew install xcodegen && xcodegen generate
   so it **defeats all three client-side heuristics** — which is the whole point,
   it shows why frame-content / liveness / jailbreak-integrity signals are needed.
   Both injection tabs replay the clip chosen with **Choose Video…**.
+- **Live coupling** (only active on an injection source) runs a **real
+  `AVCaptureSession` at the same time** as the injected buffer, so the demo has
+  the property that matters to eKYC: the system privacy indicator (green dot) is
+  on and a genuine capture session is live, while the frames the detector sees are
+  the replayed clip. Three options:
+  - *Off* — injected source only; no real session, so no green dot (the original behaviour).
+  - *Cam on, show video* — **green dot on**, and the preview + the detector both
+    show the injected **video**.
+  - *Show cam, buf=video* — **green dot on**, the preview shows the **live
+    camera** (what a human reviewer sees), but the buffer handed to the detector
+    is the **video**. This is the "looks live, verifies a clip" case.
+
+  It is still in-process: the real session only lights the indicator and (in the
+  third mode) supplies the on-screen preview. No system camera is registered and
+  no other app is touched — that remains out of scope (see above).
 - **Choose Video…** picks a clip from Photos or Files to inject.
 - **Camera Preview + FPS** render whatever source is active (wall-clock FPS).
 - **Frame Inspector** shows the current pixel buffer's format, resolution,

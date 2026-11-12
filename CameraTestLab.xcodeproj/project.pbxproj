@@ -18,6 +18,7 @@
 		AA0000000000000000000209 /* FrameInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000109 /* FrameInspector.swift */; };
 		AA000000000000000000020A /* TestLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010A /* TestLog.swift */; };
 		AA0000000000000000000220 /* VCamInjectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000120 /* VCamInjectionService.swift */; };
+		AA0000000000000000000221 /* CoupledInjectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000121 /* CoupledInjectionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		AA000000000000000000010A /* TestLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLog.swift; sourceTree = "<group>"; };
 		AA000000000000000000010B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000000000000000000120 /* VCamInjectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCamInjectionService.swift; sourceTree = "<group>"; };
+		AA0000000000000000000121 /* CoupledInjectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupledInjectionService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 				AA0000000000000000000106 /* CameraCaptureService.swift */,
 				AA0000000000000000000107 /* VideoFixtureService.swift */,
 				AA0000000000000000000120 /* VCamInjectionService.swift */,
+				AA0000000000000000000121 /* CoupledInjectionService.swift */,
 				AA0000000000000000000108 /* VCamDetectionService.swift */,
 				AA0000000000000000000109 /* FrameInspector.swift */,
 				AA000000000000000000010A /* TestLog.swift */,
@@ -153,6 +156,7 @@
 				AA0000000000000000000206 /* CameraCaptureService.swift in Sources */,
 				AA0000000000000000000207 /* VideoFixtureService.swift in Sources */,
 				AA0000000000000000000220 /* VCamInjectionService.swift in Sources */,
+				AA0000000000000000000221 /* CoupledInjectionService.swift in Sources */,
 				AA0000000000000000000208 /* VCamDetectionService.swift in Sources */,
 				AA0000000000000000000209 /* FrameInspector.swift in Sources */,
 				AA0000000000000000000204 /* PreviewView.swift in Sources */,
